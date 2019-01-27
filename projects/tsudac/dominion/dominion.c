@@ -9,10 +9,10 @@
  * Prototypes for refactored
  * functions, assignment 2
  * ****************************/
-int refacSmithy();
-int refacAdventurer();
-int refacCutpurse();
-int refacAmbassador();
+int refacSmithy(int cp, struct gameState *s, int hp);
+int refacAdventurer(int cp, struct gameState *s, int th, int dt);
+int refacCutpurse(int cp, struct gameState *s, int hp);
+int refacAmbassador(int cp, struct gameState *s, int hp);
 int refacEmbargo();
 
 
@@ -678,7 +678,7 @@ int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState
   switch( card ) 
     {
     case adventurer:
-     return refacAdventurer();
+     return refacAdventurer(currentPlayer, state, temphand, drawntreasure);
 
 /***************************************************************
         while(drawntreasure<2){
@@ -844,7 +844,7 @@ int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState
       return 0;
 		
     case smithy:
-      return refacSmithy();
+      return refacSmithy(currentPlayer, state, handPos);
 /***************************************************************************
  * refactored code, moved to refacSmithy     
       //+3 Cards
@@ -1129,7 +1129,7 @@ int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState
 ***************************************************************************************/
    
     case cutpurse:
-      return refacCutpurse();
+      return refacCutpurse(currentPlayer, state, handPos);
 /**********************************************************************
  * yanked code, found in refac function
       updateCoins(currentPlayer, state, 2);
@@ -1166,7 +1166,7 @@ int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState
 ***********************************************************************/
 		
     case embargo: 
-      return refacEmbargo();
+      return refacEmbargo(currentPlayer, state, handPos);
  /*********************************************************************
   * yanked code, moved to refac embargo     
       //+2 Coins
@@ -1258,66 +1258,68 @@ int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState
 /**************************************************************************************
                     REFACTORED FUNCTIONS FOR ASSIGNMENT 2
 **************************************************************************************/
-int refacSmithy()
+//accepts current player, game state, and hand position as parameters
+int refacSmithy(int cp, struct gameState *s, int hp)
 {
 
-      //+3 Cards
-      for (i = 0; i < 3; i++)
+    //+3 Cards
+    for (int i = 0; i < 3; i++)
 	{
-	  drawCard(currentPlayer, state);
+	  drawCard(cp, s);
 	}
 			
       //discard card from hand
-      discardCard(handPos, currentPlayer, state, 0);
+      discardCard(hp, cp, s, 0);
       return 0;
 		
 }
 
-int refacAdventurer()
+int refacAdventurer(int cp, struct gameState *s, int th, int dt)
 {
 
-      while(drawntreasure<2){
-	if (state->deckCount[currentPlayer] <1){//if the deck is empty we need to shuffle discard and add to deck
-	  shuffle(currentPlayer, state);
+    int z = 0;
+    while(dt<2){
+	if (s->deckCount[currentPlayer] <1){//if the deck is empty we need to shuffle discard and add to deck
+	  shuffle(cp, s);
 	}
-	drawCard(currentPlayer, state);
-	cardDrawn = state->hand[currentPlayer][state->handCount[currentPlayer]-1];//top card of hand is most recently drawn card.
+	drawCard(cp, s);
+	int cardDrawn = s->hand[cp][s->handCount[cp]-1];//top card of hand is most recently drawn card.
 	if (cardDrawn == copper || cardDrawn == silver || cardDrawn == gold)
-	  drawntreasure++;
+	  dt++;
 	else{
-	  temphand[z]=cardDrawn;
-	  state->handCount[currentPlayer]--; //this should just remove the top card (the most recently drawn one).
+	  th[z]=cardDrawn;
+	  s->handCount[currentPlayer]--; //this should just remove the top card (the most recently drawn one).
 	  z++;
 	}
       }
       while(z-1>=0){
-	state->discard[currentPlayer][state->discardCount[currentPlayer]++]=temphand[z-1]; // discard all cards in play that have been drawn
+	s->discard[cp][s->discardCount[cp]++]=th[z-1]; // discard all cards in play that have been drawn
 	z=z-1;
       }
       return 0;
 }
 
-int refacCutpurse()
+int refacCutpurse(int cp, struct gameState *s, int hp)
 {
 
-      updateCoins(currentPlayer, state, 2);
-      for (i = 0; i < state->numPlayers; i++)
+      updateCoins(cp, s, 2);
+      for (int i = 0; i < s->numPlayers; i++)
 	{
-	  if (i != currentPlayer)
+	  if (i != cp)
 	    {
-	      for (j = 0; j < state->handCount[i]; j++)
+	      for (int j = 0; j < s->handCount[i]; j++)
 		{
-		  if (state->hand[i][j] == copper)
+		  if (s->hand[i][j] == copper)
 		    {
-		      discardCard(j, i, state, 0);
+		      discardCard(j, i, s, 0);
 		      break;
 		    }
-		  if (j == state->handCount[i])
+		  if (j == s->handCount[i])
 		    {
-		      for (k = 0; k < state->handCount[i]; k++)
+		      for (int k = 0; k < s->handCount[i]; k++)
 			{
 			  if (DEBUG)
-			    printf("Player %d reveals card number %d\n", i, state->hand[i][k]);
+			    printf("Player %d reveals card number %d\n", i, s->hand[i][k]);
 			}	
 		      break;
 		    }		
@@ -1328,7 +1330,7 @@ int refacCutpurse()
 	}				
 
       //discard played card from hand
-      discardCard(handPos, currentPlayer, state, 0);			
+      discardCard(hp, cp, s, 0);			
 
       return 0;
 
@@ -1337,7 +1339,7 @@ int refacCutpurse()
 int refacAmbassador()
 {
 
-      j = 0;		//used to check if player has enough cards to discard
+      int j = 0;		//used to check if player has enough cards to discard
 
       if (choice2 > 2 || choice2 < 0)
 	{
@@ -1349,7 +1351,7 @@ int refacAmbassador()
 	  return -1;
 	}
 
-      for (i = 0; i < state->handCount[currentPlayer]; i++)
+      for (int i = 0; i < state->handCount[currentPlayer]; i++)
 	{
 	  if (i != handPos && i == state->hand[currentPlayer][choice1] && i != choice1)
 	    {
