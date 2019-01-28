@@ -10,10 +10,10 @@
  * functions, assignment 2
  * ****************************/
 int refacSmithy(int cp, struct gameState *s, int hp);
-int refacAdventurer(int cp, struct gameState *s, int th, int dt);
+int refacAdventurer(int cp, struct gameState *s, int th[], int dt);
 int refacCutpurse(int cp, struct gameState *s, int hp);
-int refacAmbassador(int cp, struct gameState *s, int hp);
-int refacEmbargo();
+int refacAmbassador(int cp, struct gameState *s, int hp, int c1, int c2);
+int refacEmbargo(int cp, struct gameState *s, int hp, int c1);
 
 
 int compare(const void* a, const void* b) {
@@ -1065,7 +1065,7 @@ int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState
       return 0;
 		
     case ambassador:
-      return refacAmbassador();
+      return refacAmbassador(currentPlayer, state, handPos, choice1, choice2);
 /**********************************************************************************
  * yanked code, moved to refacAmbassador
 
@@ -1166,7 +1166,7 @@ int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState
 ***********************************************************************/
 		
     case embargo: 
-      return refacEmbargo(currentPlayer, state, handPos);
+      return refacEmbargo(currentPlayer, state, handPos, choice1);
  /*********************************************************************
   * yanked code, moved to refac embargo     
       //+2 Coins
@@ -1266,34 +1266,34 @@ int refacSmithy(int cp, struct gameState *s, int hp)
     for (int i = 0; i < 3; i++)
 	{
 	  drawCard(cp, s);
+      s->handCount[cp]++; /*ASSIGNMENT 2 BUG*/
 	}
 			
       //discard card from hand
-      discardCard(hp, cp, s, 0);
-      return 0;
-		
+      discardCard(hp, cp, s, 1); /*ASSIGNMENT 2 BUG */ 
+	    return 0;
 }
 
-int refacAdventurer(int cp, struct gameState *s, int th, int dt)
+int refacAdventurer(int cp, struct gameState *s, int th[], int dt)
 {
 
     int z = 0;
-    while(dt<2){
-	if (s->deckCount[currentPlayer] <1){//if the deck is empty we need to shuffle discard and add to deck
+    if(dt<2){ /*ASSIGNMENT 2 BUG */
+	if (s->deckCount[cp] <1){//if the deck is empty we need to shuffle discard and add to deck
 	  shuffle(cp, s);
 	}
 	drawCard(cp, s);
-	int cardDrawn = s->hand[cp][s->handCount[cp]-1];//top card of hand is most recently drawn card.
+	int cardDrawn = s->hand[cp][s->handCount[cp]];//top card of hand is most recently drawn card. /* ASSIGNMENT 2 BUG*/
 	if (cardDrawn == copper || cardDrawn == silver || cardDrawn == gold)
 	  dt++;
 	else{
 	  th[z]=cardDrawn;
-	  s->handCount[currentPlayer]--; //this should just remove the top card (the most recently drawn one).
+	  s->handCount[cp]--; //this should just remove the top card (the most recently drawn one).
 	  z++;
 	}
       }
       while(z-1>=0){
-	s->discard[cp][s->discardCount[cp]++]=th[z-1]; // discard all cards in play that have been drawn
+	s->discard[cp][s->discardCount[cp]]=th[z-1]; // discard all cards in play that have been drawn /*ASSIGNMENT 2 BUG*/
 	z=z-1;
       }
       return 0;
@@ -1312,14 +1312,14 @@ int refacCutpurse(int cp, struct gameState *s, int hp)
 		  if (s->hand[i][j] == copper)
 		    {
 		      discardCard(j, i, s, 0);
-		      break;
+		      //break;   /* ASSIGNMENT 2 BUG */
 		    }
 		  if (j == s->handCount[i])
 		    {
 		      for (int k = 0; k < s->handCount[i]; k++)
 			{
 			  if (DEBUG)
-			    printf("Player %d reveals card number %d\n", i, s->hand[i][k]);
+			    printf("Player %d reveals card number %d\n", i, s->hand[i][j]); /*ASSIGNMENT 2 BUG */
 			}	
 		      break;
 		    }		
@@ -1336,59 +1336,59 @@ int refacCutpurse(int cp, struct gameState *s, int hp)
 
 }
 
-int refacAmbassador()
+int refacAmbassador(int cp, struct gameState *s, int hp, int c1, int c2)
 {
 
       int j = 0;		//used to check if player has enough cards to discard
 
-      if (choice2 > 2 || choice2 < 0)
+      if (c2 > 2 && c2 < 0) /* ASSIGNMENT 2 BUG */
 	{
 	  return -1;				
 	}
 
-      if (choice1 == handPos)
+      if (c1 == hp)
 	{
 	  return -1;
 	}
 
-      for (int i = 0; i < state->handCount[currentPlayer]; i++)
+      for (int i = 0; i < s->handCount[cp]; i++)
 	{
-	  if (i != handPos && i == state->hand[currentPlayer][choice1] && i != choice1)
+	  if (i != hp && i == s->hand[cp][c1] && i != c1)
 	    {
 	      j++;
 	    }
 	}
-      if (j < choice2)
+      if (j < c2)
 	{
 	  return -1;				
 	}
 
       if (DEBUG) 
-	printf("Player %d reveals card number: %d\n", currentPlayer, state->hand[currentPlayer][choice1]);
+	printf("Player %d reveals card number: %d\n", cp, s->hand[cp][c1]);
 
       //increase supply count for choosen card by amount being discarded
-      state->supplyCount[state->hand[currentPlayer][choice1]] += choice2;
+      s->supplyCount[s->hand[cp][c1]] += c2;
 			
       //each other player gains a copy of revealed card
-      for (i = 0; i < state->numPlayers; i++)
+      for (int i = 0; i < s->numPlayers; i++)
 	{
-	  if (i != currentPlayer)
-	    {
-	      gainCard(state->hand[currentPlayer][choice1], state, 0, i);
-	    }
+	  //if (i != cp)  ASSIGNMENT 2 BUG
+	   // {
+	      gainCard(s->hand[cp][c1], s, 0, i);
+	   // }
 	}
 
       //discard played card from hand
-      discardCard(handPos, currentPlayer, state, 0);			
+      discardCard(hp, cp, s, 0);			
 
       //trash copies of cards returned to supply
-      for (j = 0; j < choice2; j++)
+      for (j = 0; j < c2; j++)
 	{
-	  for (i = 0; i < state->handCount[currentPlayer]; i++)
+	  for (int i = 0; i < s->handCount[cp]; i++)
 	    {
-	      if (state->hand[currentPlayer][i] == state->hand[currentPlayer][choice1])
+	      if (s->hand[cp][i] == s->hand[cp][c1])
 		{
-		  discardCard(i, currentPlayer, state, 1);
+		  discardCard(i, cp, s, 1);
 		  break;
 		}
 	    }
@@ -1397,23 +1397,23 @@ int refacAmbassador()
       return 0;
 }
 
-int refacEmbargo()
+int refacEmbargo(int cp, struct gameState *s, int hp, int c1)
 {
 
       //+2 Coins
-      state->coins = state->coins + 2;
+      s->coins = s->coins + 2;
 			
       //see if selected pile is in play
-      if ( state->supplyCount[choice1] == -1 )
+      if ( s->supplyCount[c1] == -1 )
 	{
 	  return -1;
 	}
 			
       //add embargo token to selected supply pile
-      state->embargoTokens[choice1]++;
+      s->embargoTokens[c1]++;
 			
       //trash card
-      discardCard(handPos, currentPlayer, state, 1);		
+      discardCard(hp, cp, s, 1);		
       return 0;
 		
 }
