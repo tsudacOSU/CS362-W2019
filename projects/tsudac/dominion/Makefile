@@ -35,5 +35,10 @@ player: player.c interface.o
 
 all: playdom player 
 
+
+#for Assignment 3 Testing
+a3test: a3testing.h a3testing.c dominion.o
+	gcc -o a3test a3testing.h a3testing.c -g dominion.o $(CFLAGS)
+
 clean:
 	rm -f *.o playdom.exe playdom player player.exe  *.gcov *.gcda *.gcno *.so *.out testDrawCard testDrawCard.exe
