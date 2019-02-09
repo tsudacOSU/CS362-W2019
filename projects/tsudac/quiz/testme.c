@@ -15,14 +15,15 @@ const int CHANCE = 10;
 char inputChar()
 {
     char c;
-// will produce a random input from the ASCII table (DEL excluded)
-    c = (rand() % 126);
+// will produce a random input from the ASCII table (1-33, 162 excluded)
+    c = (rand() % 129) + 33;
     return c;
 }
 
 char *inputString()
 {
-    // TODO: rewrite this function
+    // 1/CHANCE chance that the test will produce a string that contains "reset", triggering one of the test cases
+    // otherwise, generates a random string of size max string
    char *string[MAX_STRING];
    int testCase = (rand() % CHANCE);
    if(testCase == 0)
@@ -31,7 +32,7 @@ char *inputString()
    {
         for(int i = 0; i < MAX_STRING; i++)
         {
-            string[i] = (rand() % 126);
+            string[i] = (rand() % 126) + 33;
         }
    }
    
@@ -86,6 +87,6 @@ int main(int argc, char *argv[])
     }
     **********************************/
 
-    //testme();
+    testme();
     return 0;
 }
