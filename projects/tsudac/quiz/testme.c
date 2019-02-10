@@ -15,8 +15,8 @@ const int CHANCE = 10;
 char inputChar()
 {
     char c;
-// will produce a random input from the ASCII table (1-33, 162 excluded)
-    c = (rand() % 129) + 32;
+// will produce a random input from the ASCII table (1-31, 127 excluded)
+    c = (rand() % 94) + 32;
     return c;
 }
 
@@ -32,7 +32,7 @@ char *inputString()
    {
         for(int i = 0; i < MAX_STRING; i++)
         {
-            string[i] = (rand() % 126) + 33; //this particular formula gives some unprintable characters; it does not seem to affect testing but looks kind of gross
+            string[i] = (rand() % 94) + 32; //will produce random input from the ASCII table (1-31, 127 excluded)
         }
    }
    
