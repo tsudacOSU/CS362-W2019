@@ -37,9 +37,27 @@ all: playdom player
 
 
 #for Assignment 3 Testing
-a3test: unittest1.c dominion.o rngs.o
-	gcc -o a3test unittest1.c -g dominion.o rngs.o $(CFLAGS)
-	./a3test
+unittestresults: unittest1.c unittest2.c unittest3.c unittest4.c dominion.o rngs.o
+	echo "Result for running unit tests:" > unittestresults.out
+	echo "unittest1.c:" >> unittestresults.out
+
+	gcc -o unittest1 unittest1.c -g dominion.o rngs.o $(CFLAGS)
+	./unittest1 >>unittestresults.out
+	gcov dominion.c >> unittestresults.out
+
+	gcc -o unittest2 unittest2.c -g dominion.o rngs.o $(CFLAGS)
+	./unittest2 >>unittestresults.out
+	gcov dominion.c >> unittestresults.out
+	
+	
+	gcc -o unittest3 unittest3.c -g dominion.o rngs.o $(CFLAGS)
+	./unittest3 >>unittestresults.out
+	gcov dominion.c >> unittestresults.out
+
+
+	gcc -o unittest4 unittest4.c -g dominion.o rngs.o $(CFLAGS)
+	./unittest4 >>unittestresults.out
+	gcov dominion.c >> unittestresults.out
 
 clean:
 	rm -f *.o playdom.exe playdom player player.exe  *.gcov *.gcda *.gcno *.so *.out testDrawCard testDrawCard.exe
