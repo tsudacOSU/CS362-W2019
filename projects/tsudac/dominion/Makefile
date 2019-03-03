@@ -60,5 +60,25 @@ unittestresults: unittest1.c unittest2.c unittest3.c unittest4.c dominion.o rngs
 	./unittest4 >>unittestresults.out
 	gcov dominion.c >> unittestresults.out
 
+#for Assignment 4 Testing
+randomtestresults: randomtestcard1.c randomtestcard2.c randomtestadventurer.c dominion.o rngs.o
+	echo "Result for running random test, card 1:">randomtestcard1.out
+	
+	gcc -o randomtestcard1 randomtestcard1.c -g dominion.o rngs.o $(CFLAGS)
+	./randomtestcard1 >>randomtestcard1.out
+	gcov dominion.c >>randomtestcard1.out
+
+	echo "Result for running random test, card 2:">randomtestcard2.out
+	
+	gcc -o randomtestcard2 randomtestcard2.c -g dominion.o rngs.o $(CFLAGS)
+	./randomtestcard2 >>randomtestcard2.out
+	gcov dominion.c >>randomtestcard2.out
+	
+	#echo "Result for running random test, adventurer card:">randomtestcardadventurer.out
+	
+	#gcc -o randomtestcardadventurer randomtestcardadventurer.c -g dominion.o rngs.o $(CFLAGS)
+	#./randomcardtestadventurer >>randomtestcardadventurer.out
+	#gcov dominion.c >>randomtestcardadventurer.out
+
 clean:
 	rm -f *.o playdom.exe playdom player player.exe  *.gcov *.gcda *.gcno *.so *.out testDrawCard testDrawCard.exe

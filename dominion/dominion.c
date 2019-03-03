@@ -1272,7 +1272,7 @@ int gainCard(int supplyPos, struct gameState *state, int toFlag, int player)
     }
 	
   //added card for [whoseTurn] current player:
-  // toFlag = 0 : add to discard
+	  // toFlag = 0 : add to discard
   // toFlag = 1 : add to deck
   // toFlag = 2 : add to hand
 
