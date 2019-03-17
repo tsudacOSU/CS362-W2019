@@ -653,6 +653,12 @@ int adventurerCardEffect(struct gameState *state, int currentPlayer, int handPos
   int cardDrawn;
 
   while (drawntreasure < 2) {
+    
+    /*bug found, shuffle had been removed*/
+	if(state->deckCount[currentPlayer] <1){
+		shuffle(currentPlayer,state);
+	}
+
     drawCard(currentPlayer, state);
     // top card of hand is most recently drawn card.
     cardDrawn = state->hand[currentPlayer][state->handCount[currentPlayer] - 1];
@@ -670,8 +676,8 @@ int adventurerCardEffect(struct gameState *state, int currentPlayer, int handPos
     state->discard[currentPlayer][state->discardCount[currentPlayer]++] = temphand[z - 1];
     z = z - 1;
   }
-  // discard played card
-  discardCard(handPos, currentPlayer, state, 0);
+  // discard played card BUG FOUND: extra discard added
+  //discardCard(handPos, currentPlayer, state, 0);
   return 0;
 }
 
